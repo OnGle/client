@@ -157,6 +157,9 @@ main() {
     [ -d "$d" ] && fatal "$d already exists"
     binary="wireleap"
     binarydir="$(realpath "$d")"
+    if [ $symlink_path == "auto" ]; then
+        symlink_path="$HOME/.local/bin/wireleap"
+    fi
 
     echo "* verifying environment ..."
     _verify_environment
