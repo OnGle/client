@@ -93,7 +93,9 @@ _verify_environment() {
         [ -d "$symlink_path" ] && fatal "$symlink_path is a directory"
         [ -e "$symlink_path" ] && fatal "$symlink_path already exists"
         [ -w "$symdir" ] || fatal "$symdir is not writable"
-        _in_path "$symdir" || fatal "$symdir is not in \$PATH"
+        if ! _in_path "$symdir"; then
+            [ -n "$add_to_path" ] && _add_to_path "$symdir" || fatal "$symdir is not in \$PATH"
+        fi
         command -v "$symfile" >/dev/null && fatal "$symfile already in \$PATH"
     fi
 
@@ -106,6 +108,23 @@ _verify_environment() {
     [ "$skip_checksum" ] || command -v sha512sum >/dev/null || fatal "$e"
 
     return 0
+}
+
+_add_to_path() {
+    sympath="$1"
+    export_line="export PATH=\"$1:\$PATH\";"
+    found_profile=
+    for profile in "$HOME/.profile" "$HOME/.bash_profile"; do
+        if [ -f $profile ]; then
+            found_profile=$profile
+        fi
+    done
+
+    if [ -z $found_profile ]; then
+        warn "couldn't find profile to add $sympath to \$PATH"
+    else
+        echo $export_line >> $found_profile;
+    fi
 }
 
 _download() {
@@ -157,8 +176,10 @@ main() {
     [ -d "$d" ] && fatal "$d already exists"
     binary="wireleap"
     binarydir="$(realpath "$d")"
+
     if [ $symlink_path == "auto" ]; then
         symlink_path="$HOME/.local/bin/wireleap"
+        add_to_path=1
     fi
 
     echo "* verifying environment ..."
