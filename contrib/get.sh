@@ -2,6 +2,7 @@
 set -e
 
 fatal() { echo "fatal: $*" 1>&2; exit 1; }
+warn() { echo "warn: $*" 1>&2; }
 
 usage() {
 cat<<EOF
