@@ -94,8 +94,8 @@ _verify_environment() {
         [ -d "$symlink_path" ] && fatal "$symlink_path is a directory"
         [ -e "$symlink_path" ] && fatal "$symlink_path already exists"
         [ -w "$symdir" ] || fatal "$symdir is not writable"
-        if ! _in_path "$symdir"; then
-            [ -n "$add_to_path" ] && _add_to_path "$symdir" || fatal "$symdir is not in \$PATH"
+        if (! _in_path "$symdir" && [ -z "$add_to_path" ]); then
+            fatal "$symdir is not in \$PATH"
         fi
         command -v "$symfile" >/dev/null && fatal "$symfile already in \$PATH"
     fi
@@ -219,6 +219,11 @@ main() {
     if [ "$symlink_path" ]; then
         echo "* creating symlink $symlink_path ..."
         ln -sf "$binarydir/$binary" "$symlink_path"
+    fi
+    if [ -n "$add_to_path" ]; then
+        symdir="$(dirname "$symlink_path")"
+        echo "* adding $symdir to PATH ..."
+        _add_to_path "$symdir"
     fi
 
     echo "* complete"
