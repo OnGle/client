@@ -113,7 +113,7 @@ _verify_environment() {
 
 _add_to_path() {
     sympath="$1"
-    export_line="export PATH=\"$1:\$PATH\";"
+    export_line="export PATH=\"\$PATH:$sympath\";"
     found_profile=
     for profile in "$HOME/.profile" "$HOME/.bash_profile"; do
         if [ -f $profile ]; then
